@@ -14,7 +14,7 @@
                 id="upload_file"
                 accept=".jpeg,.png"
             />
-            <input type="submit" value="submit" id="submit" />
+            <input type="submit" value="submit" id="compress" />
         </form>
         <script>
             const form = document.querySelector("form");
@@ -36,7 +36,30 @@
                 })
                     .then((response) => response.json())
                     .then((data) => {
-                        console.log(data);
+                        const fileType = data.data.extention;
+
+                        const img = document.createElement("img");
+                        img.src = `data:image/${fileType};base64,${data.data.base64}`;
+                        // set width and height of img to 100px
+                        img.width = 100;
+                        img.height = 100;
+
+                        // allow user to download image by clicking download button
+                        const download = document.createElement("a");
+                        download.href = `data:image/${fileType};base64,${data.data.base64}`;
+                        download.download = `image.${fileType}`;
+                        download.innerText = "Download";
+                        // append img and download button to the page
+                        document.body.appendChild(img);
+                        document.body.appendChild(download);
+                        // show the image size in paragraph tag
+                        const sizeBeforeCompress = document.createElement("p");
+                        sizeBeforeCompress.innerText = `Orginal Image Size: ${data.data.sizeBeforeCompress}`;
+                        document.body.appendChild(sizeBeforeCompress);
+
+                        const sizeAfterCompress = document.createElement("p");
+                        sizeAfterCompress.innerText = `Compressed Image Size: ${data.data.sizeAfterCompress}`;
+                        document.body.appendChild(sizeAfterCompress);
                     });
             });
         </script>

@@ -4,13 +4,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import imagemin from "imagemin";
-import imageminJpegtran from "imagemin-jpegtran";
-import imageminPngquant from "imagemin-pngquant";
-import { getFileSize } from "./utils.js";
 import fs from "fs";
+import { compressImage } from "./utils.js";
 const app = express();
 const port = 3001;
+
 // set the server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
@@ -50,36 +48,14 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname + "/index.html"));
 });
 app.post("/uploads", upload.single("image"), async (req, res) => {
-    const data = await compress(req.file.path);
-    console.log(data);
+    const data = await compressImage(req.file.path);
+    const extention = req.file.filename.split(".").pop();
     deleteOldFolders(uploadFolder);
     deleteOldFolders(compressedFolder);
     createNewUploadsFolder(uploadFolder);
     res.send({
         message: "success",
-        data: data,
+        data: { ...data, extention },
     });
 });
-
 // compress image using imagemin
-const compress = async (filePath, min = 0.5, max = 0.5) => {
-    try {
-        const file = await imagemin([filePath], {
-            destination: compressedFolder,
-            plugins: [
-                imageminJpegtran(),
-                imageminPngquant({
-                    quality: [min, max],
-                }),
-            ],
-        });
-        const sizeAfterCompress = getFileSize(file[0].destinationPath);
-        return {
-            base64: file[0].data.toString("base64").slice(0, 100),
-            sizeBeforeCompress: getFileSize(filePath),
-            sizeAfterCompress: sizeAfterCompress,
-        };
-    } catch (e) {
-        console.log(e);
-    }
-};
