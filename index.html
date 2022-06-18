@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <form method="post" enctype="multipart/form-data">
+            <input
+                type="file"
+                name="image"
+                id="upload_file"
+                accept=".jpeg,.png"
+            />
+            <input type="submit" value="submit" id="submit" />
+        </form>
+        <script>
+            const form = document.querySelector("form");
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+
+                const files = document.querySelector("[type=file]").files;
+                const formData = new FormData();
+
+                for (let i = 0; i < files.length; i++) {
+                    let file = files[i];
+
+                    formData.append("image", file);
+                }
+
+                fetch("http://localhost:3001/uploads", {
+                    method: "POST",
+                    body: formData,
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
+                    });
+            });
+        </script>
+    </body>
+</html>
